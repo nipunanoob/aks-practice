@@ -1,17 +1,21 @@
 variable "location" {
   type = string
+  default = "East US"
 }
 
 variable "resource_group_name" {
   type = string
+  default = "aks-mvp-rg"
 }
 
 variable "acr_name" {
   type = string
+  default = "aksregistrymvp"
 }
 
 variable "aks_cluster_name" {
   type = string
+  default = "aks-mvp"
 }
 
 variable "azure_subscription" {
@@ -21,4 +25,20 @@ variable "azure_subscription" {
 
 variable "tags" {
   type = map(string)
+  default = {
+    Environment: "Dev"
+    Project: "AKS-MVP"
+    }
+}
+
+variable "tenant_id" {
+  type = string
+}
+
+variable "client_id" {
+  type = string
+}
+
+variable "client_secret" {
+  type = string
 }

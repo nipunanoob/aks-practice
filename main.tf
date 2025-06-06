@@ -5,11 +5,40 @@ terraform {
       version = "4.32.0"
     }
   }
+  backend "azurerm" {
+    resource_group_name = "tfstate"
+    storage_account_name = "tfstatemvpstorage"
+    container_name = "tfstate"
+    key = "terraform.tfstate"
+  }
+  
 }
 
 provider "azurerm" {
   features {}
   subscription_id = var.azure_subscription
+  tenant_id = var.tenant_id
+  client_id = var.client_id
+  client_secret = var.client_secret
+}
+
+resource "azurerm_resource_group" "tfstate" {
+  name     = "tfstate"
+  location = "East US"
+}
+
+resource "azurerm_storage_account" "tfstate" {
+  name                     = "tfstatemvpstorage"
+  resource_group_name      = azurerm_resource_group.tfstate.name
+  location                 = azurerm_resource_group.tfstate.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+}
+
+resource "azurerm_storage_container" "tfstate" {
+  name                  = "tfstate"
+  storage_account_id  = azurerm_storage_account.tfstate.id
+  container_access_type = "blob"
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -35,9 +64,11 @@ resource "azurerm_kubernetes_cluster" "aks" {
   tags = var.tags
 
   default_node_pool {
-    name       = "default"
-    node_count = 1
-    vm_size    = "Standard_B2s"
+    name       = "terraform"
+    node_count = 2
+    vm_size    = "Standard_B2ms"
+    type = "VirtualMachineScaleSets"
+    temporary_name_for_rotation = "terratemp"
   }
 
   identity {
